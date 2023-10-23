@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 @Builder
+@ToString
 public class User implements UserDetails {
 
     @Id

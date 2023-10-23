@@ -47,6 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
         } catch (JwtException ex) {
+            System.out.println("ERROR:: " + ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             ApiResponseMessage<String> apiResponseMessage =

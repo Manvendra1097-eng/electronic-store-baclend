@@ -5,6 +5,7 @@ import com.m2code.dtos.UserDto;
 import com.m2code.dtos._Role;
 import com.m2code.entities.Role;
 import com.m2code.entities.User;
+import com.m2code.exception.BadApiRequestException;
 import com.m2code.exception.ResourceNotFoundException;
 import com.m2code.helper.UserSpecification;
 import com.m2code.helper.Util;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +47,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        Optional<User> dbUser = userRepository.findByEmail(userDto.getEmail());
+        if (dbUser.isPresent()) {
+            throw new BadApiRequestException("user already registered");
+        }
         User user = modelMapper.map(userDto, User.class);
         user.setUserId(Util.getId());
         user.setPassword(encoder.encode(userDto.getPassword()));
@@ -58,8 +65,17 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(UserDto userDto, String userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("User is not registered"));
+
         User userToUpdate = modelMapper.map(userDto, User.class);
         userToUpdate.setUserId(user.getUserId());
+
+        if (userToUpdate.getPassword() != null)
+            userToUpdate.setPassword(userToUpdate.getPassword().trim());
+        if (StringUtils.isEmpty(userToUpdate.getPassword()))
+            userToUpdate.setPassword(user.getPassword());
+        else
+            userToUpdate.setPassword(encoder.encode(userToUpdate.getPassword()));
+
         return modelMapper.map(userRepository.save(userToUpdate), UserDto.class);
     }
 

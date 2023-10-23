@@ -2,7 +2,6 @@ package com.m2code.services.impl;
 
 import com.m2code.dtos.AddToCartRequest;
 import com.m2code.dtos.CartDto;
-import com.m2code.dtos.ProductDto;
 import com.m2code.entities.Cart;
 import com.m2code.entities.CartItem;
 import com.m2code.entities.Product;
@@ -17,8 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,7 +32,7 @@ public class CartServiceImpl implements CartService {
     private final ModelMapper modelMapper;
 
     @Override
-    public ProductDto addToCart(String userId, AddToCartRequest request) {
+    public CartDto addToCart(String userId, AddToCartRequest request) {
         User user = getUserBYId(userId);
         String productId = request.getProductId();
         int quantity = request.getQuantity();
@@ -40,21 +41,19 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = cartItemRepository.findByProductAndCart(product, cart).orElse(null);
         if (cartItem == null) {
             cartItem = CartItem.builder().cart(cart).product(product).quantity(quantity)
-                    .totalPrice(quantity * product.getPrice()).build();
+                    .totalPrice(quantity * product.getDiscountedPrice()).build();
         } else {
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setTotalPrice(cartItem.getTotalPrice() + quantity * product.getPrice());
+            cartItem.setTotalPrice(cartItem.getTotalPrice() + quantity * product.getDiscountedPrice());
         }
         List<CartItem> cartItems = cart.getCartItems();
-
         if (cartItems == null) {
             cartItems = new ArrayList<>();
         }
         cartItems.add(cartItem);
         cart.setCartItems(cartItems);
-        cartRepository.save(cart);
-
-        return modelMapper.map(product, ProductDto.class);
+        Cart savedCart = cartRepository.save(cart);
+        return modelMapper.map(savedCart, CartDto.class);
     }
 
     private Product getProductById(String productId) {
@@ -77,7 +76,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void removeFromCart(String userId, String productId) {
+    public CartDto removeFromCart(String userId, String productId) {
         User user = getUserBYId(userId);
         Cart cart = getOrCreateCartForUser(user);
         Product product = getProductById(productId);
@@ -85,11 +84,35 @@ public class CartServiceImpl implements CartService {
         if (cartItem != null) {
             cartItemRepository.delete(cartItem);
         }
+
+        Cart dbCart = cartRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Cart is not " +
+                "available "));
+        return modelMapper.map(dbCart, CartDto.class);
+    }
+
+    @Override
+    public Integer getCartItemNumber(Principal principal) {
+        String email = principal.getName();
+        User user = getUserBYEmail(email);
+        Integer length = 0;
+        Cart cart = user.getCart();
+        if (!Objects.isNull(cart)) {
+            List<CartItem> cartItems = user.getCart().getCartItems();
+            if (!Objects.isNull(cartItems))
+                length = cartItems.size();
+        }
+        return length;
     }
 
     private User getUserBYId(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User is not available for id: " + userId));
     }
+
+    private User getUserBYEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User is not available " +
+                "for id: " + email));
+    }
+
 
     private Cart getOrCreateCartForUser(User user) {
         Cart cart = cartRepository.findByUser(user).orElse(null);

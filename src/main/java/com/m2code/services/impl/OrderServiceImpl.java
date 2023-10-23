@@ -16,9 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -91,6 +93,29 @@ public class OrderServiceImpl implements OrderService {
         return Util.getPageableResponse(page, OrderDto.class);
     }
 
+    @Override
+    public OrderDto updateOrder(String orderId, OrderUpdateRequest request) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (StringUtils.hasText(request.getBillingName()))
+            order.setBillingName(request.getBillingName());
+        if (StringUtils.hasText(request.getBillingAddress()))
+            order.setBillingAddress(request.getBillingAddress());
+        if (StringUtils.hasText(request.getBillingPhone()))
+            order.setBillingPhone(request.getBillingPhone());
+        if (!Objects.isNull(request.getDeliveredDate()) && StringUtils.hasText(request.getDeliveredDate().toString()))
+            order.setDeliveredDate(request.getDeliveredDate());
+        if (StringUtils.hasText(request.getOrderStatus())) {
+            System.out.println(ORDER_STATUS.getStatus(request.getOrderStatus()).name() + " DElived");
+            order.setOrderStatus(ORDER_STATUS.getStatus(request.getOrderStatus()));
+        }
+
+        if (StringUtils.hasText(request.getPaymentStatus())) {
+            order.setPaymentStatus(PAYMENT_STATUS.getStatus(request.getPaymentStatus()));
+        }
+        Order updatedOrder = orderRepository.save(order);
+        return modelMapper.map(updatedOrder, OrderDto.class);
+    }
+
     private static Sort getSort(String sortBy, String sortDir) {
         return sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -100,7 +125,8 @@ public class OrderServiceImpl implements OrderService {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User is not registed"));
     }
 
-    private Order getOrderById(String orderId) {
+    @Override
+    public Order getOrderById(String orderId) {
         return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
     }
 

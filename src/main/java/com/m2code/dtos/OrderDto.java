@@ -23,4 +23,5 @@ public class OrderDto {
     private ORDER_STATUS orderStatus = ORDER_STATUS.PENDING;
     private PAYMENT_STATUS paymentStatus = PAYMENT_STATUS.NOT_PAID;
     private List<OrderItemDto> orderItems;
+    private UserDto user;
 }

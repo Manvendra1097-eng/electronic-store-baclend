@@ -1,5 +1,6 @@
 package com.m2code.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.m2code.entities.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(value = {"password"}, allowSetters = true)
 public class UserDto {
     private String userId;
     @NotBlank(message = "name is required")
@@ -29,4 +31,5 @@ public class UserDto {
     private String about;
     private String profileImage;
     private Set<Role> roles = new HashSet<>();
+
 }

@@ -73,6 +73,7 @@ public class ProductController {
     @GetMapping("/live")
     @Operation(summary = "get all live product")
     public ResponseEntity<PageableResponse<ProductDto>> findAllProductLive(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size, @RequestParam(required = false, defaultValue = "title") String sortBy, @RequestParam(required = false, defaultValue = "ASC") String sortDir) {
+
         PageableResponse<ProductDto> pageableResponse = productService.findAllProductLive(page, size, sortBy, sortDir);
         return new ResponseEntity<>(pageableResponse, HttpStatus.OK);
     }
@@ -114,5 +115,6 @@ public class ProductController {
     public void serveImage(@PathVariable String productId, HttpServletResponse response) throws IOException {
         productService.serveImage(productId, response);
     }
+
 
 }

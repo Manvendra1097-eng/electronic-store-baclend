@@ -26,6 +26,9 @@ public interface ProductService {
 
     PageableResponse<ProductDto> searchProduct(int page, int size, String sortBy, String sortDir, String keyword);
 
+    public PageableResponse<ProductDto> searchProductByTileAndCategory(int pageN, int size, String sortBy,
+                                                                       String sortDir, String keyword);
+
     void deleteProduct(String productId) throws IOException;
 
     void uploadImage(MultipartFile file, String productId) throws IOException;

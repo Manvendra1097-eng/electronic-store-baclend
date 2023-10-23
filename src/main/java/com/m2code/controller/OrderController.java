@@ -1,9 +1,6 @@
 package com.m2code.controller;
 
-import com.m2code.dtos.ApiResponseMessage;
-import com.m2code.dtos.OrderDto;
-import com.m2code.dtos.PageableResponse;
-import com.m2code.dtos.PlaceOrderRequest;
+import com.m2code.dtos.*;
 import com.m2code.services.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,9 +49,20 @@ public class OrderController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "orderDate") String sortBy,
-            @RequestParam(required = false, defaultValue = "ASC") String sortDir
+            @RequestParam(required = false, defaultValue = "DESC") String sortDir
     ) {
         PageableResponse<OrderDto> pageableResponse = orderService.getAllOrder(page, size, sortBy, sortDir);
         return new ResponseEntity<>(pageableResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/{orderId}")
+    @Operation(summary = "update order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<OrderDto> updateOrder(
+            @PathVariable("orderId") String orderId,
+            @RequestBody OrderUpdateRequest request
+    ) {
+        OrderDto dto = orderService.updateOrder(orderId, request);
+        return ResponseEntity.ok(dto);
     }
 }

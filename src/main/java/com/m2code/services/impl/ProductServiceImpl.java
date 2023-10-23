@@ -5,6 +5,7 @@ import com.m2code.dtos.ProductDto;
 import com.m2code.entities.Category;
 import com.m2code.entities.Product;
 import com.m2code.exception.ResourceNotFoundException;
+import com.m2code.helper.ProductSpecification;
 import com.m2code.helper.Util;
 import com.m2code.repositories.CategoryRepository;
 import com.m2code.repositories.ProductRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
@@ -51,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto createProductWithCategory(ProductDto productDto, String categoryId) {
         Product product = modelMapper.map(productDto, Product.class);
         product.setProductId(Util.getId());
+        product.setAddedAt(new Date(System.currentTimeMillis()));
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category is not available for id : " + categoryId));
         product.setCategory(category);
         return modelMapper.map(productRepository.save(product), ProductDto.class);
@@ -115,6 +118,19 @@ public class ProductServiceImpl implements ProductService {
         return pageableResponse;
     }
 
+
+    @Override
+    public PageableResponse<ProductDto> searchProductByTileAndCategory(int pageN, int size, String sortBy,
+                                                                       String sortDir, String keyword) {
+        Sort sort = getSort(sortBy, sortDir);
+        Pageable pageable = PageRequest.of(pageN, size, sort);
+        Specification<Product> specification = Specification.where(null);
+        specification = specification.and(ProductSpecification.titleProductSpecification(keyword));
+        Page<Product> page = productRepository.findAll(specification, pageable);
+        PageableResponse<ProductDto> pageableResponse = Util.getPageableResponse(page, ProductDto.class);
+        return pageableResponse;
+    }
+
     @Override
     public void deleteProduct(String productId) throws IOException {
         Product dbProduct = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product is not available for id : " + productId));
@@ -143,7 +159,7 @@ public class ProductServiceImpl implements ProductService {
         Product dbProduct = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product is not available for id : " + productId));
         InputStream inputStream = Util.serveFile(dbProduct.getProductImage(), path);
         response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        StreamUtils.copy(inputStream, response.getOutputStream());
+        if (inputStream != null) StreamUtils.copy(inputStream, response.getOutputStream());
     }
 
     private static Sort getSort(String sortBy, String sortDir) {

@@ -104,7 +104,7 @@ public class UserController {
     ) throws IOException {
         String fileName = userService.uploadImage(file, userId);
         ApiResponseMessage<String> apiResponseMessage = ApiResponseMessage.<String>builder()
-                .message("File uploaded with file name : " + fileName)
+                .message(fileName)
                 .success(true)
                 .build();
         return new ResponseEntity<>(apiResponseMessage, HttpStatus.CREATED);

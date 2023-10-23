@@ -29,6 +29,4 @@ public class Product {
     private String productImage;
     @ManyToOne
     private Category category;
-    @OneToOne(mappedBy = "product")
-    private OrderItem orderItem;
 }

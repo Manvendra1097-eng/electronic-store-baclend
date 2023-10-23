@@ -36,3 +36,9 @@ jwt:
 
 #86400000
 
+razorpay:
+  secret:
+    id: rzp_test_IOCh6tAQLEKrid
+    key: oObriJL1cKlcwHJfYMoX0OSS
+
+

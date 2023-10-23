@@ -43,7 +43,15 @@ public interface Util {
     }
 
     static InputStream serveFile(String fileName, String path) throws FileNotFoundException {
-        String fullFilePath = path.concat("/").concat(fileName);
-        return new FileInputStream(fullFilePath);
+        try {
+            String fullFilePath = path.concat("/").concat(fileName);
+            return new FileInputStream(fullFilePath);
+        } catch (FileNotFoundException ex) {
+            System.out.println("File not found");
+        } catch (NullPointerException ex) {
+            return null;
+        }
+
+        return null;
     }
 }

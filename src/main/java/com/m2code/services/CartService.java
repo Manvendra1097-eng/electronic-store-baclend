@@ -2,14 +2,17 @@ package com.m2code.services;
 
 import com.m2code.dtos.AddToCartRequest;
 import com.m2code.dtos.CartDto;
-import com.m2code.dtos.ProductDto;
+
+import java.security.Principal;
 
 public interface CartService {
-    ProductDto addToCart(String userId, AddToCartRequest request);
+    CartDto addToCart(String userId, AddToCartRequest request);
 
     CartDto getCart(String userId);
 
     void clearCart(String userId);
 
-    void removeFromCart(String userId, String productId);
+    CartDto removeFromCart(String userId, String productId);
+
+    Integer getCartItemNumber(Principal principal);
 }

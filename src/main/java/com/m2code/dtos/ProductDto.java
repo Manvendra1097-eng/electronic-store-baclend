@@ -15,7 +15,6 @@ import java.util.Date;
 @Builder
 public class ProductDto {
     private String productId;
-
     @NotEmpty(message = "Title is required")
     private String title;
     private String description;
@@ -30,4 +29,5 @@ public class ProductDto {
     private boolean live;
     private boolean stock;
     private String productImage;
+    private CategoryDto category;
 }

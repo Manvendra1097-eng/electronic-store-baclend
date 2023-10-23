@@ -59,7 +59,8 @@ public class ApplicationConfig {
         return ((request, response, authException) -> {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            ApiResponseMessage<String> apiResponseMessage = ApiResponseMessage.<String>builder().message(authException.getMessage())
+            ApiResponseMessage<String> apiResponseMessage = ApiResponseMessage.<String>builder()
+                    .message(authException.getMessage())
                     .success(false).build();
             ObjectMapper mapper = new ObjectMapper();
             String jsonResponseBody = mapper.writeValueAsString(apiResponseMessage);
