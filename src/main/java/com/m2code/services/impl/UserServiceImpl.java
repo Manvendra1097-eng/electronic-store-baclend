@@ -54,25 +54,13 @@ public class UserServiceImpl implements UserService {
         User user = modelMapper.map(userDto, User.class);
         user.setUserId(Util.getId());
         user.setPassword(encoder.encode(userDto.getPassword()));
-
-
-        if (userDto.getRoles() == null) {
-            Role userRole =
-                    roleRepository.findByRole(_Role.ROLE_USER.name()).orElseThrow(() -> new ResourceNotFoundException(
-                            "USER role is" +
-                                    " not" +
-                                    " available"));
-            user.getRoles().add(userRole);
-        } else {
-            Role adminRole =
-                    roleRepository.findByRole(_Role.ROLE_ADMIN.name()).orElseThrow(() -> new ResourceNotFoundException(
-                            "USER role is" +
-                                    " not" +
-                                    " available"));
-            user.getRoles().add(adminRole);
-        }
-
-
+        Role userRole =
+                roleRepository.findByRole(_Role.ROLE_USER.name()).orElseThrow(() -> new ResourceNotFoundException(
+                        "USER role is" +
+                                " not" +
+                                " available"));
+        user.getRoles().add(userRole);
+            
         return modelMapper.map(userRepository.save(user), UserDto.class);
     }
 
