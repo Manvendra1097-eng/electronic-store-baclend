@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:mysql://root:iGbfxWvMPK6YAEMwDtwF@containers-us-west-88.railway.app:7894/railway
+    username: root
+    password: iGbfxWvMPK6YAEMwDtwF
