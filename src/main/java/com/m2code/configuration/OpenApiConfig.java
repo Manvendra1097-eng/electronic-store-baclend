@@ -33,7 +33,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 @Server(
                         description = "Prod Env",
-                        url = "http://localhost:9191"
+                        url = "https://electronic-store-baclend-production.up.railway.app"
                 )
         },
         security = {
