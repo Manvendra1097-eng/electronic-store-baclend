@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
                                 " not" +
                                 " available"));
         user.getRoles().add(userRole);
-            
+
         return modelMapper.map(userRepository.save(user), UserDto.class);
     }
 
